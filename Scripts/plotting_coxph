@@ -1,0 +1,17 @@
+
+Results <-Gene.results.list[do.call(rbind,(lapply(Gene.results.list,function(x) dim(x))))[,1]!=1]
+names(Results) <- names(Gene.cox.list)[1:8][do.call(rbind,(lapply(Gene.results.list,function(x) dim(x))))[,1]!=1]
+
+Results.mat <-data.frame(do.call(rbind,(Results)))
+Results.mat[,"HR"] <- as.numeric(Results.mat[,"HR"])
+Results.mat[,"Upper"] <- as.numeric(Results.mat[,"Upper"] )
+Results.mat[,"Lower"] <- as.numeric(Results.mat[,"Lower"] )
+Results.mat[,"Subtype"] <- c(rep(c("All","Luminal","Basal"),length(Results)))
+Results.mat[,"Dataset"] <- factor(Results.mat[,"Dataset"])
+
+
+All.sites <-ggplot(Results.mat, aes(y=HR,x=Dataset,ymin=Lower,ymax=Upper,label=paste("n =",Number_Events)))+
+	geom_point() + geom_errorbar() + #geom_text(y=-0.7,hjust=0,vjust=0)+ 
+	geom_hline(yintercept=1,lty=2)+ 
+	coord_flip()+ scale_x_discrete()+  scale_y_continuous(limits=c(-1,10))+
+	facet_wrap(~Subtype,ncol=1)+theme_bw()+labs(title=paste(Title))
